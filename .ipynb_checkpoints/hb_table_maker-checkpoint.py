@@ -2,8 +2,6 @@
 
 import pandas as pd
 import numpy as np
-import subprocess
-import os
 
 def hb_maker(phased_vars_file):
     df_vcf = pd.read_csv(phased_vars_file, sep="\t", names=['CHROM','POS','ID','REF','ALT','QUAL','FILTER','INFO','FORMAT', "sample"])
@@ -16,13 +14,28 @@ def hb_maker(phased_vars_file):
     # Min Quality of 10, this means there is no more than 1/10000 chance of an icorrect base call (>99.9% accuracy)
     # & (pd.to_numeric(df_vcf['DP']) >= 20
     phased = df_vcf.loc[df_vcf['PS'].notna(), ['CHROM','POS','QUAL','GENE','GT','DP','PS','REF','ALT']]
-    # phased["DP"] = pd.to_numeric(phased["DP"], errors="coerce")
-    # phased = phased.sort_values(by="DP")
+    phased["DP"] = pd.to_numeric(phased["DP"], errors="coerce")
+    phased = phased.sort_values(by="DP")
+
+    #print(phased[phased["GENE"].str.contains("SM")])
+
+
+    gr_unfilterd = df_vcf.groupby(['PS']).agg({'POS': ['min','max', 'count'],
+                                                    'CHROM': 'first',
+                                                    'QUAL': 'mean',
+                                                    'GENE': 'unique'}).reset_index()
 
     grouped = phased.groupby(['PS']).agg({'POS': ['min','max', 'count'],
                                                     'CHROM': 'first',
                                                     'QUAL': 'mean',
                                                     'GENE': 'unique'}).reset_index()
+    #print(grouped[grouped[("CHROM", "first")]=="chr7"])
+
+    #print(ph_GOI[ph_GOI[("POS")]==117524809])
+    #print(gr_unfilterd)
+    #print(grouped)
+    #mr_grouped = pd.merge(grouped, gr_unfilterd, how="left", on=["PS",("POS","max")])
+    print(len(phased))
     return grouped
 
 
@@ -75,44 +88,10 @@ def phased_GOI(regions_file, phased_hps):
     # print(GOI_variants)
     
 
-def switch_errors(bs_df, sample, version):
-    folder = "/hpc/umc_laat/gvandersluis/data/"
-    ph_vars = f"{folder}Ont_data_nhung/HG00{sample}/{version}_ROI/phased_ROI.vcf.gz"
-
-    BM_ROI = f"{folder}Ont_data_nhung/HG00{sample}/{version}_ROI/ROI_eval.tsv"
-    open(BM_ROI, "w").close()
-
-
-    for idx, region in bs_df.iterrows():
-        print(region)
-        reg = region["POSITION"]
-        print(reg)
-        gen = region["GENE"]
-        out_vcf = f"{folder}Ont_data_nhung/HG00{sample}/{version}_ROI/{gen}_BM.vcf"
-        cmd = ["apptainer", "exec", "-B", "/hpc/:/hpc/", "/hpc/umc_laat/gvandersluis/software/bcftools_v1.9-1-deb_cv1.sif", "bcftools", "view", "-r", reg, ph_vars, "-Oz", "-o", out_vcf]
-        subprocess.run(cmd, check=True)
-        tsv_out = f"{gen}_eval.tsv"
-        cmd2 = ["apptainer", "exec", "-B", "/hpc/:/hpc/", "/hpc/umc_laat/gvandersluis/software/whatshap_v1.sif", "whatshap", "compare","--tsv-pairwise", tsv_out, "--names", f"BENCHMARK,{gen}", out_vcf, ph_vars]
-        subprocess.run(cmd2, check=True)
-        if os.path.getsize(BM_ROI) == 0:
-            with open(BM_ROI, "w") as out:
-                with open(tsv_out, "r") as inp:
-                    out.write(inp.read())
-        else:
-            with open(BM_ROI, "a") as out:
-                with open(tsv_out, "r") as inp:
-                    next(inp)
-                    out.write(inp.read())
-        os.remove(out_vcf)
-        os.remove(tsv_out)
-        print(gen, "\t Done")
-
-
-
-    sw_e = pd.read_csv(BM_ROI, sep="\t")
-    sw_e= sw_e[["dataset_name1","all_switches"]]
-    sw_e = sw_e.rename(columns={"dataset_name1": "GENE"},inplace=True)
-    print(sw_e)
+def switch_errors(switch_err_file, bs_df):
+    sw_e = pd.read_csv(switch_err_file, sep="\t")
+    sw_e= sw_e[["dataset_name0","all_switches"]]
+    sw_e = sw_e.rename(columns={"dataset_name0": "GENE"})
 
     switch_df = pd.merge(bs_df, sw_e, on="GENE", how="inner")
     print(switch_df, '\n\n')
@@ -129,39 +108,37 @@ def main():
     print("VCF filtered on PASS, QUAL >= 40 & ROI")
     phased_hb = hb_maker(filtered_v[0])
     basis_df = phased_GOI(goi_file, phased_hb)
-    sw_er_db1 = switch_errors(basis_df, "2", "filtered")
+    sw_er_db1 = switch_errors(filtered_v[1], basis_df)
 
-    # print("VCF filtered on PASS & ROI")
-    # unfiltered_v = ["/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG002/unfiltered_ROI/uf_phased_ROI_nh.vcf",
-    #             "/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG002/unfiltered_ROI/ROI_eval.tsv"]
-    # phased_hb2 = hb_maker(unfiltered_v[0])
-    # basis_df2 = phased_GOI(goi_file, phased_hb2)
-    # sw_er_db2 = switch_errors(unfiltered_v[1], basis_df2)
+    print("VCF filtered on PASS & ROI")
+    unfiltered_v = ["/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG002/unfiltered_ROI/uf_phased_ROI_nh.vcf",
+                "/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG002/unfiltered_ROI/ROI_eval.tsv"]
+    phased_hb2 = hb_maker(unfiltered_v[0])
+    basis_df2 = phased_GOI(goi_file, phased_hb2)
+    sw_er_db2 = switch_errors(unfiltered_v[1], basis_df2)
 
-    # print("VCF filtered on ROI")
-    # ununfiltered_v = ["/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG002/un_unfiltered_ROI/un_unphased_ROI_nh.vcf",
-    #             "/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG002/un_unfiltered_ROI/ROI_eval.tsv"]
-    # phased_hb3 = hb_maker(ununfiltered_v[0])
-    # basis_df3 = phased_GOI(goi_file, phased_hb3)
-    # sw_er_db3 = switch_errors(basis_df3, "2", "un_unfiltered")
-    # sw_er_db3 = sw_er_db3[["GENE","PHASED_VARIANTS"]]
-    # sw_er_db3.rename(columns={"PHASED_VARIANTS": "total_vars"}, inplace=True)
-    # print(sw_er_db1)
-    # print(sw_er_db3)
+    print("VCF filtered on ROI")
+    ununfiltered_v = ["/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG002/un_unfiltered_ROI/uf_uf_phased_ROI_nh.vcf",
+                "/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG002/un_unfiltered_ROI/ROI_eval.tsv"]
+    phased_hb3 = hb_maker(ununfiltered_v[0])
+    basis_df3 = phased_GOI(goi_file, phased_hb3)
+    sw_er_db3 = switch_errors(ununfiltered_v[1], basis_df3)
+    sw_er_db3 = sw_er_db3[["GENE","PHASED_VARIANTS"]]
+    sw_er_db3.rename(columns={"PHASED_VARIANTS": "total_vars"}, inplace=True)
 
 
-    # final_db = pd.merge(sw_er_db1, sw_er_db3, on="GENE", how="inner")
-    # final_db["FILTERED_VARS"] = final_db["total_vars"] - final_db["PHASED_VARIANTS"]
-    # final_db.pop("total_vars")
+    final_db = pd.merge(sw_er_db1, sw_er_db3, on="GENE", how="inner")
+    final_db["FILTERED_VARS"] = final_db["total_vars"] - final_db["PHASED_VARIANTS"]
+    final_db.pop("total_vars")
 
-    # int_cols = ["POS_START", "POS_END", "HB_LENGTH", "PHASED_VARIANTS", "FILTERED_VARS"]
+    int_cols = ["POS_START", "POS_END", "HB_LENGTH", "PHASED_VARIANTS", "FILTERED_VARS"]
 
-    # for c in int_cols:
-    #     final_db[c] = pd.to_numeric(final_db[c], errors="coerce").astype("Int64")
-    # final_db = final_db.astype(str).replace("<NA>", "NaN")
-    # print(final_db.dtypes)
+    for c in int_cols:
+        final_db[c] = pd.to_numeric(final_db[c], errors="coerce").astype("Int64")
+    final_db = final_db.astype(str).replace("<NA>", "NaN")
+    print(final_db.dtypes)
 
-    # print(final_db[["GENE", "POSITION", "POS_START", "POS_END", "HB_LENGTH", "PHASED_VARIANTS", "FILTERED_VARS","all_switches"]])
+    print(final_db[["GENE", "POSITION", "POS_START", "POS_END", "HB_LENGTH", "PHASED_VARIANTS", "FILTERED_VARS","all_switches"]])
 
 
 

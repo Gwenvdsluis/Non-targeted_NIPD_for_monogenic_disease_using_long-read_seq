@@ -1,21 +1,15 @@
 #!/usr/bin/env python3
 
-
-
-### what does it need to do:
-# loop though ROI.bed file
-# per gene loop through benchmark file and add to empty (only first need the header)
-
-
 import subprocess
 import os
 
 sample = "2"
+version = "filtered"
 folder = "/hpc/umc_laat/gvandersluis/data/"
-ph_vars = f"{folder}Ont_data_nhung/HG00{sample}/filtered_ROI/phased_ROI.vcf.gz"
+ph_vars = f"{folder}Ont_data_nhung/HG00{sample}/{version}_ROI/phased_ROI.vcf.gz"
 roi = f"{folder}Ref_HG/HG_annotation_ROI.bed"
 
-BM_ROI = f"{folder}Ont_data_nhung/HG00{sample}/filtered_ROI/ROI_eval.tsv"
+BM_ROI = f"{folder}Ont_data_nhung/HG00{sample}/{version}_ROI/ROI_eval.tsv"
 open(BM_ROI, "w").close()
 
 
@@ -23,7 +17,7 @@ for region in open(roi, "r").readlines():
     regspl = region.split("\t")
     gen = regspl[3]
     reg = regspl[0]+":"+regspl[1]+"-"+regspl[2]
-    out_vcf = f"{folder}Ont_data_nhung/HG00{sample}/filtered_ROI/{gen}_BM.vcf"
+    out_vcf = f"{folder}Ont_data_nhung/HG00{sample}/{version}_ROI/{gen}_BM.vcf"
     cmd = ["apptainer", "exec", "-B", "/hpc/:/hpc/", "/hpc/umc_laat/gvandersluis/software/bcftools_v1.9-1-deb_cv1.sif", "bcftools", "view", "-r", reg, ph_vars, "-Oz", "-o", out_vcf]
     subprocess.run(cmd, check=True)
     tsv_out = f"{gen}_eval.tsv"
