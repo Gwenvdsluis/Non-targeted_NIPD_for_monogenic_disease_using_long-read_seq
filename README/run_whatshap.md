@@ -86,3 +86,4 @@ whatshap compare --tsv-pairwise=eval_ROI.tsv ../hg002_BM_sstrio.vcf.gz phased_RO
 MAKE A NO HEADER VERSION OF THE phased VCF
 
 bcftools view -H phased_ROI.vcf > phased_ROI_nh.vcf
+
