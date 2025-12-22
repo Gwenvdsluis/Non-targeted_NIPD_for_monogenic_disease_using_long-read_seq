@@ -1,0 +1,127 @@
+dec-15 15:10:28.130 [main] DEBUG nextflow.cli.Launcher - $> nextflow run epi2me-labs/wf-human-variation --help
+dec-15 15:10:28.519 [main] DEBUG nextflow.cli.CmdRun - N E X T F L O W  ~  version 25.10.2
+dec-15 15:10:28.534 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/home/umc_laat/gvandersluis/.nextflow/plugins; core-plugins: nf-amazon@3.4.2,nf-azure@1.20.2,nf-cloudcache@0.5.0,nf-codecommit@0.5.0,nf-console@1.3.0,nf-google@1.23.3,nf-k8s@1.2.2,nf-tower@1.17.3,nf-wave@1.16.1
+dec-15 15:10:28.629 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+dec-15 15:10:28.630 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+dec-15 15:10:28.632 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.12.0 in 'deployment' mode
+dec-15 15:10:28.720 [main] DEBUG nextflow.util.RetryConfig - Missing nextflow session - using default retry config
+dec-15 15:10:29.233 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+dec-15 15:10:29.314 [main] DEBUG nextflow.scm.ProviderConfig - Using SCM config path: /home/umc_laat/gvandersluis/.nextflow/scm
+dec-15 15:10:31.315 [main] DEBUG nextflow.scm.AssetManager - Git config: /home/umc_laat/gvandersluis/.nextflow/assets/epi2me-labs/wf-human-variation/.git/config; branch: null; remote: origin; url: https://github.com/epi2me-labs/wf-human-variation.git
+dec-15 15:10:31.437 [main] DEBUG nextflow.scm.RepositoryFactory - Found Git repository result: [RepositoryFactory]
+dec-15 15:10:31.520 [main] DEBUG nextflow.scm.AssetManager - Git config: /home/umc_laat/gvandersluis/.nextflow/assets/epi2me-labs/wf-human-variation/.git/config; branch: null; remote: origin; url: https://github.com/epi2me-labs/wf-human-variation.git
+dec-15 15:10:32.856 [main] DEBUG nextflow.config.ConfigBuilder - Found config base: /home/umc_laat/gvandersluis/.nextflow/assets/epi2me-labs/wf-human-variation/nextflow.config
+dec-15 15:10:32.913 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /home/umc_laat/gvandersluis/.nextflow/assets/epi2me-labs/wf-human-variation/nextflow.config
+dec-15 15:10:32.924 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `standard`
+dec-15 15:10:34.233 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+dec-15 15:10:34.234 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[]
+dec-15 15:10:34.315 [main] DEBUG n.secret.LocalSecretsProvider - Secrets store: /home/umc_laat/gvandersluis/.nextflow/secrets/store.json
+dec-15 15:10:34.317 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@6c075e9d] - activable => nextflow.secret.LocalSecretsProvider@6c075e9d
+dec-15 15:10:34.319 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 from script declaration
+dec-15 15:10:34.319 [main] DEBUG nextflow.cli.CmdRun - Launching `https://github.com/epi2me-labs/wf-human-variation` [curious_cantor] DSL2 - revision: d0db6d8766 [master]
+dec-15 15:10:34.427 [main] DEBUG nextflow.Session - Session UUID: 33f21175-b7f2-4ecb-8698-924d8d45b418
+dec-15 15:10:34.428 [main] DEBUG nextflow.Session - Run name: curious_cantor
+dec-15 15:10:34.428 [main] DEBUG nextflow.Session - Executor pool size: 2
+dec-15 15:10:34.434 [main] DEBUG nextflow.file.FilePorter - File porter settings maxRetries=3; maxTransfers=50; pollTimeout=null
+dec-15 15:10:34.513 [main] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=10; maxSize=10; workQueue=LinkedBlockingQueue[-1]; allowCoreThreadTimeout=false
+dec-15 15:10:34.530 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 25.10.2 build 10555
+  Created: 28-11-2025 19:24 UTC (20:24 CEST)
+  System: Linux 4.18.0-553.74.1.el8_10.x86_64
+  Runtime: Groovy 4.0.28 on OpenJDK 64-Bit Server VM 25.0.1+8-LTS
+  Encoding: UTF-8 (UTF-8)
+  Process: 2130495@hpcs06.manage.hpc [143.121.243.146]
+  CPUs: 1 - Mem: 5 GB (4.8 GB) - Swap: 24 GB (21.6 GB)
+dec-15 15:10:34.627 [main] DEBUG nextflow.Session - Work-dir: /hpc/umc_laat/gvandersluis/scripts/work [nfs]
+dec-15 15:10:35.031 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+dec-15 15:10:35.038 [main] DEBUG nextflow.Session - Observer factory (v2): LinObserverFactory
+dec-15 15:10:35.040 [main] DEBUG nextflow.Session - Observer factory (v2): DefaultObserverFactory
+dec-15 15:10:35.314 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
+dec-15 15:10:35.320 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 2; maxThreads: 1000
+dec-15 15:10:35.541 [main] DEBUG nextflow.Session - Session start
+dec-15 15:10:35.613 [main] DEBUG nextflow.trace.TraceFileObserver - Workflow started -- trace file: output/execution/trace.txt
+dec-15 15:10:35.619 [main] DEBUG nextflow.Session - Using default localLib path: /home/umc_laat/gvandersluis/.nextflow/assets/epi2me-labs/wf-human-variation/lib
+dec-15 15:10:35.624 [main] DEBUG nextflow.Session - Adding to the classpath library: /home/umc_laat/gvandersluis/.nextflow/assets/epi2me-labs/wf-human-variation/lib
+dec-15 15:10:35.625 [main] DEBUG nextflow.Session - Adding to the classpath library: /home/umc_laat/gvandersluis/.nextflow/assets/epi2me-labs/wf-human-variation/lib/nfcore_external_java_deps.jar
+dec-15 15:10:43.125 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+dec-15 15:10:48.520 [main] DEBUG nextflow.script.ScriptRunner - Parsed script files:
+  Script_7fcd46ddb8f308ee: /home/umc_laat/gvandersluis/.nextflow/assets/epi2me-labs/wf-human-variation/modules/local/wf-human-snp.nf
+  Script_b36d2c7306b1dce4: /home/umc_laat/gvandersluis/.nextflow/assets/epi2me-labs/wf-human-variation/main.nf
+  Script_11fedbae59454609: /home/umc_laat/gvandersluis/.nextflow/assets/epi2me-labs/wf-human-variation/modules/local/common.nf
+  Script_9e92fc2423a5e057: /home/umc_laat/gvandersluis/.nextflow/assets/epi2me-labs/wf-human-variation/workflows/wf-human-snp.nf
+dec-15 15:10:48.520 [main] DEBUG nextflow.Session - Session aborted -- Cause: Cannot invoke method optional() on null object
+dec-15 15:10:48.531 [main] DEBUG n.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=0; failedCount=0; ignoredCount=0; cachedCount=0; pendingCount=0; submittedCount=0; runningCount=0; retriesCount=0; abortedCount=0; succeedDuration=0ms; failedDuration=0ms; cachedDuration=0ms;loadCpus=0; loadMemory=0; peakRunning=0; peakCpus=0; peakMemory=0; ]
+dec-15 15:10:48.726 [main] DEBUG nextflow.trace.ReportObserver - Workflow completed -- rendering execution report
+dec-15 15:10:49.935 [main] DEBUG nextflow.trace.TimelineObserver - Workflow completed -- rendering execution timeline
+dec-15 15:10:50.120 [main] DEBUG nextflow.trace.TraceFileObserver - Workflow completed -- saving trace file
+dec-15 15:10:50.130 [main] ERROR nextflow.cli.Launcher - @unknown
+java.lang.NullPointerException: Cannot invoke method optional() on null object
+	at org.codehaus.groovy.runtime.NullObject.invokeMethod(NullObject.java:113)
+	at org.codehaus.groovy.vmplugin.v8.IndyGuardsFiltersAndSignatures.invokeGroovyObjectInvoker(IndyGuardsFiltersAndSignatures.java:151)
+	at org.codehaus.groovy.vmplugin.v8.IndyInterface.fromCache(IndyInterface.java:321)
+	at Script_11fedbae59454609$_runScript_closure5.doCall(Script_11fedbae59454609:154)
+	at Script_11fedbae59454609$_runScript_closure5.doCall(Script_11fedbae59454609)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:343)
+	at groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:328)
+	at org.codehaus.groovy.runtime.metaclass.ClosureMetaClass.invokeMethod(ClosureMetaClass.java:280)
+	at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1007)
+	at groovy.lang.Closure.call(Closure.java:433)
+	at groovy.lang.Closure.call(Closure.java:412)
+	at nextflow.script.BaseScript.process(BaseScript.groovy:136)
+	at org.codehaus.groovy.vmplugin.v8.IndyInterface.fromCache(IndyInterface.java:321)
+	at Script_11fedbae59454609.runScript(Script_11fedbae59454609:148)
+	at nextflow.script.BaseScript.run0(BaseScript.groovy:218)
+	at nextflow.script.BaseScript.run(BaseScript.groovy:260)
+	at nextflow.script.parser.v1.ScriptLoaderV1.runScript(ScriptLoaderV1.groovy:246)
+	at nextflow.script.parser.v1.ScriptLoaderV1.runScript(ScriptLoaderV1.groovy:231)
+	at nextflow.script.IncludeDef.memoizedMethodPriv$loadModuleV1PathMapSession(IncludeDef.groovy:166)
+	at nextflow.script.IncludeDef.access$1(IncludeDef.groovy)
+	at nextflow.script.IncludeDef$__clinit__closure3.doCall(IncludeDef.groovy)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:343)
+	at groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:328)
+	at org.codehaus.groovy.runtime.metaclass.ClosureMetaClass.invokeMethod(ClosureMetaClass.java:280)
+	at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1007)
+	at groovy.lang.Closure.call(Closure.java:433)
+	at org.codehaus.groovy.runtime.memoize.Memoize$MemoizeFunction.lambda$call$0(Memoize.java:137)
+	at org.codehaus.groovy.runtime.memoize.ConcurrentCommonCache.getAndPut(ConcurrentCommonCache.java:137)
+	at org.codehaus.groovy.runtime.memoize.ConcurrentCommonCache.getAndPut(ConcurrentCommonCache.java:113)
+	at org.codehaus.groovy.runtime.memoize.Memoize$MemoizeFunction.call(Memoize.java:136)
+	at nextflow.script.IncludeDef.loadModuleV1(IncludeDef.groovy)
+	at nextflow.script.IncludeDef.load0(IncludeDef.groovy:113)
+	at org.codehaus.groovy.vmplugin.v8.IndyInterface.fromCache(IndyInterface.java:321)
+	at Script_9e92fc2423a5e057.runScript(Script_9e92fc2423a5e057:23)
+	at nextflow.script.BaseScript.run0(BaseScript.groovy:218)
+	at nextflow.script.BaseScript.run(BaseScript.groovy:260)
+	at nextflow.script.parser.v1.ScriptLoaderV1.runScript(ScriptLoaderV1.groovy:246)
+	at nextflow.script.parser.v1.ScriptLoaderV1.runScript(ScriptLoaderV1.groovy:231)
+	at nextflow.script.IncludeDef.memoizedMethodPriv$loadModuleV1PathMapSession(IncludeDef.groovy:166)
+	at nextflow.script.IncludeDef.access$1(IncludeDef.groovy)
+	at nextflow.script.IncludeDef$__clinit__closure3.doCall(IncludeDef.groovy)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:343)
+	at groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:328)
+	at org.codehaus.groovy.runtime.metaclass.ClosureMetaClass.invokeMethod(ClosureMetaClass.java:280)
+	at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1007)
+	at groovy.lang.Closure.call(Closure.java:433)
+	at org.codehaus.groovy.runtime.memoize.Memoize$MemoizeFunction.lambda$call$0(Memoize.java:137)
+	at org.codehaus.groovy.runtime.memoize.ConcurrentCommonCache.getAndPut(ConcurrentCommonCache.java:137)
+	at org.codehaus.groovy.runtime.memoize.ConcurrentCommonCache.getAndPut(ConcurrentCommonCache.java:113)
+	at org.codehaus.groovy.runtime.memoize.Memoize$MemoizeFunction.call(Memoize.java:136)
+	at nextflow.script.IncludeDef.loadModuleV1(IncludeDef.groovy)
+	at nextflow.script.IncludeDef.load0(IncludeDef.groovy:113)
+	at org.codehaus.groovy.vmplugin.v8.IndyInterface.fromCache(IndyInterface.java:321)
+	at Script_b36d2c7306b1dce4.runScript(Script_b36d2c7306b1dce4:5)
+	at nextflow.script.BaseScript.run0(BaseScript.groovy:218)
+	at nextflow.script.BaseScript.run(BaseScript.groovy:260)
+	at nextflow.script.parser.v1.ScriptLoaderV1.runScript(ScriptLoaderV1.groovy:246)
+	at nextflow.script.parser.v1.ScriptLoaderV1.runScript(ScriptLoaderV1.groovy)
+	at nextflow.script.ScriptRunner.run(ScriptRunner.groovy:246)
+	at nextflow.script.ScriptRunner.execute(ScriptRunner.groovy:139)
+	at nextflow.cli.CmdRun.run(CmdRun.groovy:429)
+	at nextflow.cli.Launcher.run(Launcher.groovy:515)
+	at nextflow.cli.Launcher.main(Launcher.groovy:675)

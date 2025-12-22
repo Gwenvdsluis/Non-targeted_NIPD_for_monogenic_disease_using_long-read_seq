@@ -31,5 +31,9 @@ cat $HG/HG_OMIM.bed | \
    printf "%s\t%d\t%d\t%s\t%s\t%s\n", $1, start, end, $4, $5, $6; # Select the columns neccessary for a bed file
    }' > $HG/HG_OMIM_ROI.bed # save to designated file
 
+sort -k1,1 -k2,2n  $HG/HG_OMIM_ROI.bed > $HG/sorted_HG_OMIM_ROI.bed
 
-
+apptainer exec \
+  --bind /hpc/umc_laat/ \
+  /hpc/umc_laat/gvandersluis/software/bedtools_v2.27.1dfsg-4-deb_cv1.sif \
+  bedtools merge -i $HG/sorted_HG_OMIM_ROI.bed  > $HG/HG_OMIM_ROI_merged.bed

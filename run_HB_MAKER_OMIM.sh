@@ -1,0 +1,13 @@
+#!/bin/bash
+#SBATCH --job-name=WH_workflow_WF_v5.2_SUP
+#SBATCH --output=/hpc/umc_laat/gvandersluis/outs_sbatch/%x_%j.out
+#SBATCH --error=/hpc/umc_laat/gvandersluis/errors_sbatch/%x_%j.err
+#SBATCH --time=15:00:00
+#SBATCH --mem=12G
+#SBATCH --cpus-per-task=1
+# Email notifications
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=g.vandersluis-2@umcutrecht.nl
+
+
+python3 -u /hpc/umc_laat/gvandersluis/scripts/HB_MAKER_OMIM.py

@@ -1,0 +1,5 @@
+2025-12-15 15:04:35	-	pensive_bassi	-	b9acb14855694c3e2ca1bf03b6c184ab	db02d6c0-8ae0-4d66-a1bc-60c82fbceffe	nextflow wf_h_var.nf
+2025-12-15 15:07:08	-	cheeky_goldberg	-	a4b4e9589a788fc1cfd7bcad5bfc9cf0	32b4e26f-86aa-4534-8103-55d209c86aea	nextflow wf_h_var.nf
+2025-12-15 15:08:22	-	clever_borg	-	a4b4e9589a788fc1cfd7bcad5bfc9cf0	1f4c2dcf-5408-45b1-9899-18e68b5d0b80	nextflow run wf_h_var.nf
+2025-12-15 15:09:14	-	curious_brown	-	d0db6d8766f78851040311e2eb4c0e7484ada5ca	5ac748e6-93a4-4006-87ae-7998735161ff	nextflow run epi2me-labs/wf-human-variation --bam /hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG002/calls.sorted.bam --ref /hpc/umc_laat/resources/refgenomes/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta --sample_name paw70337_try --snp --sv --mod --phased --igv -profile singularity --out_dir /hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG002/WF_H_VAR/output
+2025-12-15 15:10:34	-	curious_cantor	-	d0db6d8766f78851040311e2eb4c0e7484ada5ca	33f21175-b7f2-4ecb-8698-924d8d45b418	nextflow run epi2me-labs/wf-human-variation --help
