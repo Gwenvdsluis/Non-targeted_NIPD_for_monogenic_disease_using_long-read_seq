@@ -37,3 +37,4 @@ apptainer exec \
   --bind /hpc/umc_laat/ \
   /hpc/umc_laat/gvandersluis/software/bedtools_v2.27.1dfsg-4-deb_cv1.sif \
   bedtools merge -i $HG/sorted_HG_OMIM_ROI.bed  > $HG/HG_OMIM_ROI_merged.bed
+

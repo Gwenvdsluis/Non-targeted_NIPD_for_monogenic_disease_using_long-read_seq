@@ -28,10 +28,10 @@ def ROI_getter(phased_vars, roi_b, tmpdr, phased_vars_roi, version, version_bm, 
     subprocess.run(cmd_index, check=True)
     print("DONE")
     print("Reheader:")
-    cmd_bm_reheader = f"apptainer exec -B /hpc/:/hpc/ /hpc/umc_laat/gvandersluis/software/bcftools_v1.9-1-deb_cv1.sif bcftools reheader -s <(echo {version_bm}) -o /hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG00{sample}/{version}_ROI/HG00{sample}_BM_SSANDT_rn.vcf /hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG00{sample}/HG00{sample}_GRCh38_1_22_v4.2.1_benchmark_phased_MHCassembly_StrandSeqANDTrio.vcf.gz"
+    cmd_bm_reheader = f"apptainer exec -B /hpc/:/hpc/ /hpc/umc_laat/gvandersluis/software/bcftools_v1.9-1-deb_cv1.sif bcftools reheader -s <(echo {version_bm}) -Oz -o /hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG00{sample}/{version}_ROI/HG00{sample}_BM_SSANDT_rn.vcf.gz /hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG00{sample}/HG00{sample}_GRCh38_1_22_v4.2.1_benchmark_phased_MHCassembly_StrandSeqANDTrio.vcf.gz"
     subprocess.run(cmd_bm_reheader, shell=True, executable="/bin/bash", check=True)
     print("Rheader done")
-    bm_index = ["apptainer", "exec", "-B", "/hpc/:/hpc/", "/hpc/umc_laat/gvandersluis/software/bcftools_v1.9-1-deb_cv1.sif", "bcftools", "index", "-t", f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG00{sample}/{version}_ROI/HG00{sample}_BM_SSANDT_rn.vcf"]
+    bm_index = ["apptainer", "exec", "-B", "/hpc/:/hpc/", "/hpc/umc_laat/gvandersluis/software/bcftools_v1.9-1-deb_cv1.sif", "bcftools", "index", "-t", f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG00{sample}/{version}_ROI/HG00{sample}_BM_SSANDT_rn.vcf.gz"]
     subprocess.run(bm_index, check=True)
     print("Index done")
 
@@ -159,7 +159,7 @@ def format_haploblock_table(bench_roi, hb_comp, sam, ver):
 
     ### Format the switch error file
     sw_e = sw_e[["dataset_name1","het_variants0","all_switches","all_switch_rate","all_switchflips","all_switchflip_rate","blockwise_hamming_rate"]]
-    sw_e["Accuracy"] = (1-sw_e["blockwise_hamming_rate"]).astype(str)+"%"
+    sw_e["Accuracy"] = ((1-sw_e["blockwise_hamming_rate"])*100).astype(str)+"%"
     sw_e.drop(columns="blockwise_hamming_rate")
     sw_e.rename(columns={"dataset_name1": "PS_tag"}, inplace=True)
     sw_e = pd.merge(hb_comp, sw_e, on="PS_tag", how="left")
@@ -170,21 +170,25 @@ def format_haploblock_table(bench_roi, hb_comp, sam, ver):
 ### RUN scripts
 def main():
     ### RUNNING ON NEW DATA:
-    # change: 'vers', 'samp', & filenames (phased_variants & phased_variants_roi)
+    # change: 'vers', 'samp', 'reheader_bm_s_name', & filenames (phased_variants & phased_variants_roi)
 
     print("HI, starting")
     samp="2"
-    vers="SUP_v5.2"
-    reheader_bm_s_name="SUP_v5.2"
+    vers="OMIM"
+    reheader_bm_s_name="hg002"
     TMPDIR="/hpc/umc_laat/gvandersluis/tmp"
 
     ### Create necessary directories
     create_directories(samp, vers, TMPDIR)
 
     ### Files needed for the analysis
-    phased_variants=f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG00{samp}/{vers}/SUP_v5.2.wf_snp.vcf.gz" # if filter; dont change this file
+#    phased_variants=f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG00{samp}/{vers}/SUP_v5.2.wf_snp.vcf.gz" # if filter; dont change this file
     roi_bed=f"/hpc/umc_laat/gvandersluis/data/Ref_HG/HG_OMIM_ROI_merged.bed"
-    phased_variants_roi=f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG00{samp}/{vers}_ROI/SUP_v5.2.wf_snp.vcf.gz" # if filter; change this file
+#    phased_variants_roi=f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG00{samp}/{vers}_ROI/SUP_v5.2.wf_snp.vcf.gz" # if filter; change this file
+    ### OMIM versie
+    phased_variants=f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG00{samp}/SAMPLE_renamed.vcf.gz"
+    phased_variants_roi=f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG00{samp}/{vers}_ROI/{vers}.vcf.gz"
+
 
     ### Create phased vcf of only the ROI
     ROI_getter(phased_variants, roi_bed, TMPDIR, phased_variants_roi, vers, reheader_bm_s_name, samp)
