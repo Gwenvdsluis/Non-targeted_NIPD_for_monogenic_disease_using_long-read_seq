@@ -70,7 +70,7 @@ def corr_phased_vars(complete, ps_tags):
 
         ### If the hemming rate is higher with the X, then O variants are the switches and the other way around.
         ### If the rate is 0.50, it is not possible to know which are phased correctly
-        if round(hemm_rate_x,2) == 0.50:
+        if round(hemm_rate_x,4) == 0.5000:
             complete.loc[(complete["PS_tag"] == i) & (complete["GT_BM"].notna()), "Cor_phased"] = "UNKNOWN"
         elif round(hemm_rate_x,4) > round(hemm_rate_o,4):
             complete.loc[(complete["PS_tag"] == i) & (complete["Cor_phased"] == "O" ), "Cor_phased"] = "False"
@@ -111,21 +111,22 @@ def save_vcf(vcff, outf, comp_tab):
     vcf_f.close()
 
 def main():
-    vers="HG002"
+    vers="HG003"
     ### OMIM:
     # sample="OMIM"
     # vcf_file=f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/{vers}/{sample}_ROI/{sample}.vcf.gz"
 
     ### WF_H_VAR
-    # sample="WF_H_VAR"
-    # sm="wf_hvar"
+    sample="wf_h_var"
+    sm="wf_h_var"
 
     ### SUPv5.2
-    sample="SUP_v5.2"
-    sm="SUP_v5.2"
+    # sample="SUP_v5.2"
+    # sm="SUP_v5.2"
+
 
     ### If u calculate OMIM, comment the vcf_file below out!
-    bm_file = f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/{vers}/{sample}_ROI/{vers}_BM_SSANDT_rn.vcf"
+    bm_file = f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/{vers}/{sample}_ROI/{vers}_BM_SSANDT_rn.vcf.gz"
     vcf_file = f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/{vers}/{sample}_ROI/{sm}.wf_snp.vcf.gz"
     haploblock_file = f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/{vers}/{sample}_ROI/Haploblock_switches.csv"
     output_file = f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/{vers}/{sample}_ROI/cor_phased.vcf.gz"

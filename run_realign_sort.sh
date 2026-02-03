@@ -1,0 +1,50 @@
+#!/bin/bash
+#SBATCH --job-name=ALIGN_SORT_AND_INDEX_HAPLOTAG
+#SBATCH --output=/hpc/umc_laat/gvandersluis/outs_sbatch/%x_%j.out
+#SBATCH --error=/hpc/umc_laat/gvandersluis/errors_sbatch/%x_%j.err
+#SBATCH --time=72:00:00
+#SBATCH --mem=25G
+#SBATCH --cpus-per-task=8
+# Email notifications
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=g.vandersluis-2@umcutrecht.nl
+
+
+echo "START ALIGNING"
+
+apptainer exec --bind /hpc/umc_laat/ \
+  /hpc/umc_laat/gvandersluis/software/minimap2_latest.sif \
+  minimap2 -t 8 -ax map-ont /hpc/umc_laat/resources/refgenomes/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta \
+  /hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG002/SUP_v5.2/reads.fastq > /hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG002/SUP_v5.2_ROI/aligned.sam
+
+echo "READS ARE ALIGNED INTO SAM"
+
+echo "SORT AND PUT IT IN A BAM FILE:"
+
+apptainer exec --bind /hpc/umc_laat/ \
+  /hpc/umc_laat/gvandersluis/software/samtools_latest.sif  \
+  samtools sort -o /hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG002/SUP_v5.2_ROI/aligned_sorted.bam /hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG002/SUP_v5.2_ROI/aligned.sam
+
+echo "SORTED INTO BAM FILE"
+
+echo "INDEX BAM FILE"
+
+apptainer exec --bind /hpc/umc_laat/ \
+  /hpc/umc_laat/gvandersluis/software/samtools_latest.sif  \
+  samtools index /hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG002/SUP_v5.2_ROI/aligned_sorted.bam
+
+echo "DONE INDEXING"
+echo "HAPLOTAG"
+
+apptainer exec --bind /hpc/umc_laat/ \
+  /hpc/umc_laat/gvandersluis/software/whatshap_v1.sif \
+  whatshap haplotag -o /hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG002/SUP_v5.2_ROI/haplotagged.bam --reference /hpc/umc_laat/resources/refgenomes/GCA_000001405.15_GRCh38_no_alt_analysis_set.fasta \
+  /hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG002/SUP_v5.2/SUP_v5.2.wf_snp.vcf.gz /hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG002/SUP_v5.2_ROI/aligned_sorted.bam
+
+echo "INDEX HAPLOTAGGED FILE"
+
+apptainer exec --bind /hpc/umc_laat/ \
+  /hpc/umc_laat/gvandersluis/software/samtools_latest.sif  \
+  samtools index /hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG002/SUP_v5.2_ROI/haplotagged.bam
+
+echo "DONE"
