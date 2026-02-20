@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=WH_workflow_WF_H_VAR_SUBBLOCKS_HG4
+#SBATCH --job-name=WH_workflow_WF_H_VAR_SUBBLOCKS_HG2
 #SBATCH --output=/hpc/umc_laat/gvandersluis/outs_sbatch/%x_%j.out
 #SBATCH --error=/hpc/umc_laat/gvandersluis/errors_sbatch/%x_%j.err
 #SBATCH --time=15:00:00

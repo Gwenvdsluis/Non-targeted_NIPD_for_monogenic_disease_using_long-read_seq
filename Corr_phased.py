@@ -25,11 +25,10 @@ def mod_vcf(vcf_f, sh_truth):
     vcf["Cor_phased"]="unknown"
     vcf["PS_tag"] = vcf["CHROM"].astype(str)+"_"+vcf["sample"].str.split(":").str[5]
     vcf["tag"] = vcf["CHROM"].astype(str)+"_"+vcf["POS"].astype(str)
-
     ### Merge the Benchmark file with the VCF file on the generated location tag 'tag'
     ### Turn all variants of the vcf that are in the benchmark to True.
     ### For haploblocks without switches, this will mean that all variants are correctly phased that are found in the benchmark file
-    complete = pd.merge(vcf, sh_truth, on="tag", how="left")
+    complete = pd.merge(vcf, sh_truth, on=["tag"], how="left")
     complete.loc[complete["GT_BM"].notna(), "Cor_phased"] = "True"
     return complete
 
@@ -39,20 +38,23 @@ def informative_tags(hb_f):
     ### For these haploblocks the variants need to be determined if they are correctly phased
     v5_2_new = pd.read_csv(hb_f)
     tags = v5_2_new[(v5_2_new["all_switches"] > 0) & (v5_2_new["all_switches"].notna())].sort_values("phased_variants")["PS_tag"].unique()
-    return tags
+    ps_df = v5_2_new[v5_2_new["PS_tag"].isin(tags)][["PS_tag", "chromosome", "START_HB", "END_HB"]]
+    return tags, ps_df
 
 
-def corr_phased_vars(complete, ps_tags):
-    count = 0
+def corr_phased_vars(complete, ps_tags, df_tgs):
     ### Run through all phases tags (haploblocks) in which switches are present
     for i in ps_tags:
-        count += 1
-        print(count)
+        PS = df_tgs[(df_tgs["PS_tag"] == i)]
+        ps_chrm = PS["chromosome"].iloc[0]
+        ps_strt = PS["START_HB"].iloc[0]
+        ps_end = PS["END_HB"].iloc[0]
         ### Filter rows of the dataframe that contain the PS tag and are not NaN
-        subset = complete[(complete["PS_tag"] == i) & (complete["GT_BM"].notna())]
+        subset = complete[(complete["CHROM"] == ps_chrm) & (complete["POS"] >= ps_strt) & (complete["POS"] <= ps_end) & (complete["GT_BM"].notna())]
         ### For variant in this cluster if it is not empty:
         if not subset.empty:
             for index, item in subset.iterrows():
+                print(index, item)
                 ### To check if the variants are phased correctly according to the benchmark an on which allele they are,
                 ### an X or O is connected to the variant. And - as a check to see if something else is up
                 if item["GT"] == item["GT_BM"]:
@@ -62,7 +64,7 @@ def corr_phased_vars(complete, ps_tags):
                 else:
                     complete.loc[index, "Cor_phased"] = "-"
         ### Per haploblock we can now calculate the Hemming rate.
-        tot = complete[complete["PS_tag"] == i].groupby("Cor_phased").agg("count")
+        tot = complete[(complete["CHROM"] == ps_chrm) & (complete["POS"] >= ps_strt) & (complete["POS"] <= ps_end)].groupby("Cor_phased").agg("count")
         tot_x = tot.loc[["X"],"GT"]
         tot_o = tot.loc[["O"],"GT"]
         hemm_rate_x = tot_x.loc["X"]/(tot_x.loc["X"] + tot_o.loc["O"])
@@ -71,13 +73,13 @@ def corr_phased_vars(complete, ps_tags):
         ### If the hemming rate is higher with the X, then O variants are the switches and the other way around.
         ### If the rate is 0.50, it is not possible to know which are phased correctly
         if round(hemm_rate_x,4) == 0.5000:
-            complete.loc[(complete["PS_tag"] == i) & (complete["GT_BM"].notna()), "Cor_phased"] = "UNKNOWN"
+            complete.loc[(complete["CHROM"] == ps_chrm) & (complete["POS"] >= ps_strt) & (complete["POS"] <= ps_end) & (complete["GT_BM"].notna()), "Cor_phased"] = "UNKNOWN"
         elif round(hemm_rate_x,4) > round(hemm_rate_o,4):
-            complete.loc[(complete["PS_tag"] == i) & (complete["Cor_phased"] == "O" ), "Cor_phased"] = "False"
-            complete.loc[(complete["PS_tag"] == i) & (complete["Cor_phased"] == "X" ), "Cor_phased"] = "True"
+            complete.loc[(complete["CHROM"] == ps_chrm) & (complete["POS"] >= ps_strt) & (complete["POS"] <= ps_end) & (complete["Cor_phased"] == "O" ), "Cor_phased"] = "False"
+            complete.loc[(complete["CHROM"] == ps_chrm) & (complete["POS"] >= ps_strt) & (complete["POS"] <= ps_end) & (complete["Cor_phased"] == "X" ), "Cor_phased"] = "True"
         else:
-            complete.loc[(complete["PS_tag"] == i) & (complete["Cor_phased"] == "X" ), "Cor_phased"] = "False"
-            complete.loc[(complete["PS_tag"] == i) & (complete["Cor_phased"] == "O" ), "Cor_phased"] = "True"
+            complete.loc[(complete["CHROM"] == ps_chrm) & (complete["POS"] >= ps_strt) & (complete["POS"] <= ps_end) & (complete["Cor_phased"] == "X" ), "Cor_phased"] = "False"
+            complete.loc[(complete["CHROM"] == ps_chrm) & (complete["POS"] >= ps_strt) & (complete["POS"] <= ps_end) & (complete["Cor_phased"] == "O" ), "Cor_phased"] = "True"
     complete.to_csv("/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG002/SUP_v5.2_ROI/cor_phased.csv", sep='\t', index=False)
     return complete
 
@@ -111,14 +113,14 @@ def save_vcf(vcff, outf, comp_tab):
     vcf_f.close()
 
 def main():
-    vers="HG003"
+    vers="HG002"
     ### OMIM:
     # sample="OMIM"
     # vcf_file=f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/{vers}/{sample}_ROI/{sample}.vcf.gz"
 
     ### WF_H_VAR
-    sample="wf_h_var"
-    sm="wf_h_var"
+    sample="wf_hvar"
+    sm="wf_hvar"
 
     ### SUPv5.2
     # sample="SUP_v5.2"
@@ -127,14 +129,15 @@ def main():
 
     ### If u calculate OMIM, comment the vcf_file below out!
     bm_file = f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/{vers}/{sample}_ROI/{vers}_BM_SSANDT_rn.vcf.gz"
-    vcf_file = f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/{vers}/{sample}_ROI/{sm}.wf_snp.vcf.gz"
+    vcf_file = f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/{vers}/{sample}_ROI/rn_{sm}.wf_snp.vcf.gz"
     haploblock_file = f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/{vers}/{sample}_ROI/Haploblock_switches.csv"
     output_file = f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/{vers}/{sample}_ROI/cor_phased.vcf.gz"
     bench_t = mod_bm(bm_file)
     comp_vcf = mod_vcf(vcf_file, bench_t)
-    inf_tags = informative_tags(haploblock_file)
-    corr_phased = corr_phased_vars(comp_vcf, inf_tags)
+    inf_tags, df_tags = informative_tags(haploblock_file)
+    corr_phased = corr_phased_vars(comp_vcf, inf_tags, df_tags)
     save_vcf(vcf_file, output_file, corr_phased)
 
 
 main()
+

@@ -42,47 +42,44 @@ def ROI_getter(phased_vars, roi_b, tmpdr, phased_vars_roi, version, version_bm, 
     print("Index done")
 
 
+def excel_style_suffix(n):
+    result = ""
+    n += 1
+    while n > 0:
+        n, remainder = divmod(n-1, 26)
+        result = string.ascii_uppercase[remainder] + result
+    return result
+
+
 def split_ps_tags(df):
-    ### This function adds A B C etc to sub-haploblocks (haploblocks that are defined by multiple ROIs)
-    new_ps = [""] * len(df)
+    df["PS_tag"]= "None"
     for ps, group in df.groupby("PS", dropna=False):
+        chrm = group["CHROM"].unique()[0]
         rois = group["ROI"].dropna().unique()
-        ### Single or no ROI → PS unchanged
-        if len(rois) <= 1:
-            for idx in group.index:
-                new_ps[idx] = ps
-            continue
-        ### Multiple ROIs → assign suffixes A, B, C...
-        roi_to_suffix = {
-            roi: string.ascii_uppercase[i]
-            for i, roi in enumerate(sorted(rois))}
-        for idx, row in group.iterrows():
-            if pd.isna(row["ROI"]):
-                new_ps[idx] = ps
-            else:
-                new_ps[idx] = f"{ps}.{roi_to_suffix[row['ROI']]}"
-    return new_ps
+        if len(rois) <=1:
+            df.loc[df["PS"]==ps, "PS_tag"] = chrm+"_"+ps
+        else:
+            roi_to_suffix = {
+                roi: excel_style_suffix(i)
+                for i, roi in enumerate(sorted(rois))}
+            for idx, row in group.iterrows():
+                if row["ROI"] == "None":
+                    df.loc[idx, "PS_tag"] = f"{chrm}_{ps}"
+                else:
+                    df.loc[idx, "PS_tag"] = f"{chrm}_{ps}.{roi_to_suffix[row['ROI']]}"
+    return df
 
 
 def create_sub_ps(variants, bed_file):
-    ### Convert to BED-like intervals
-    variants["start"] = variants["POS"] - 1
-    variants["end"] = variants["POS"]
-    ### Load Bed file 
-    bed = pr.read_bed(bed_file)
-    ### Convert variants to Pyranges
-    var_pr = pr.PyRanges(variants.rename(columns={
-            "CHROM": "Chromosome",
-            "start": "Start",
-            "end": "End"}))
-    ### Intersect with BED
-    overlap = var_pr.join(bed, how="left")
-    df = overlap.df
-    ### Define ROI by coordinates
-    df["ROI"] = (df["Chromosome"].astype(str) + ":" + df["Start_b"].astype(str) + "-" + df["End_b"].astype(str))
-    ### assign the suffixes
-    df["PS_R"] = split_ps_tags(df)
-    return df
+    variants["ROI"]="None"
+    bdf = open(bed_file, "r").readlines()
+    for loc in bdf:
+        chrom = loc.strip("\n").split("\t")[0]
+        start = int(loc.strip("\n").split("\t")[1])
+        stop = int(loc.strip("\n").split("\t")[2])
+        variants.loc[(variants["CHROM"].astype(str) == chrom) & (variants["POS"].astype(int) >= start) & (variants["POS"].astype(int) <= stop), "ROI"] = chrom+":"+str(start)+"-"+str(stop)
+    variants_pr = split_ps_tags(variants)
+    return variants_pr
 
 
 def hb_maker(phased_vars_file, bed_f):
@@ -101,19 +98,17 @@ def hb_maker(phased_vars_file, bed_f):
     phased['GQ'] = pd.to_numeric(phased['GQ'], errors='coerce')
 
     phased = create_sub_ps(phased, bed_f)
-
-    grouped = phased.groupby(['PS_R']).agg({'POS': ['min','max', 'count'],
-                                                    'Chromosome': 'first',
+    grouped = phased.groupby(['PS_tag']).agg({'POS': ['min','max', 'count'],
+                                                    'CHROM': 'first',
                                                     'GQ': 'mean'}).reset_index()
 
     ### Change the column names, type, and add desired columns
     grouped.columns = ['_'.join(col).rstrip('_') if isinstance(col, tuple) else col for col in grouped.columns]
-    grouped.rename(columns={"POS_min":"START_HB", "POS_max": "END_HB", "POS_count":"phased_variants", "Chromosome_first":"chromosome"}, inplace=True)
+    grouped.rename(columns={"POS_min":"START_HB", "POS_max": "END_HB", "POS_count":"phased_variants", "CHROM_first":"chromosome"}, inplace=True)
     #grouped["PS_tag"] = grouped["PS_tag"].astype(int)
     grouped["HB_length"]=grouped["END_HB"]-grouped["START_HB"]
     grouped["total_VARS"] = None
-    grouped["PS_tag"] = grouped["chromosome"].astype(str)+"_"+grouped["PS_R"].astype(str)
-    return grouped
+    return phased, grouped
 
 
 def run_switch(haploblock_table, sample, version, ph_vars, total_vars):
@@ -224,9 +219,9 @@ def main():
     # change: 'vers', 'samp', 'reheader_bm_s_name', 'benchmark_file', & filenames (phased_variants & phased_variants_roi)
 
     print("HI, starting")
-    samp="4"
-    vers="wf_h_var"
-    reheader_bm_s_name="hg004"
+    samp="2"
+    vers="wf_hvar"
+    reheader_bm_s_name="hg002"
     TMPDIR=f"/hpc/umc_laat/gvandersluis/tmp/{samp}_{os.getpid()}"
 
     ### Create necessary directories
@@ -237,8 +232,8 @@ def main():
     roi_bed=f"/hpc/umc_laat/gvandersluis/data/Ref_HG/HG_OMIM_ROI_merged.bed"
     phased_variants_roi=f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG00{samp}/{vers}_ROI/{vers}.wf_snp.vcf.gz" # if filter; change this file
     rn_phased_variants_roi=f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG00{samp}/{vers}_ROI/rn_{vers}.wf_snp.vcf.gz"
-    benchmark_file=f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG00{samp}/HG00{samp}_GRCh38_1_22_v4.2.1_benchmark.vcf.gz" # voor HG003 en HG004
-    #benchmark_file=f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG002/HG002_GRCh38_1_22_v4.2.1_benchmark_phased_MHCassembly_StrandSeqANDTrio.vcf.gz" # ALleen voor HG002
+#    benchmark_file=f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG00{samp}/HG00{samp}_GRCh38_1_22_v4.2.1_all.vcf.gz" # voor HG003 en HG004
+    benchmark_file=f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG002/HG002_GRCh38_1_22_v4.2.1_benchmark_phased_MHCassembly_StrandSeqANDTrio.vcf.gz" # ALleen voor HG002
      ### OMIM versie
 #    phased_variants=f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG00{samp}/SAMPLE_renamed.vcf.gz"
 #    phased_variants_roi=f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG00{samp}/{vers}_ROI/{vers}.vcf.gz"
@@ -248,9 +243,9 @@ def main():
     ROI_getter(phased_variants, roi_bed, TMPDIR, phased_variants_roi, vers, reheader_bm_s_name, samp, rn_phased_variants_roi, benchmark_file)
 
     ### Generate the VCF haploblock table of the ROI
-    grouped = hb_maker(rn_phased_variants_roi, roi_bed)
+    new_ps_df, grouped = hb_maker(rn_phased_variants_roi, roi_bed)
     print("First function DONE")
-
+    new_ps_df.to_csv(f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG00{samp}/{vers}_ROI/sub_PStag.csv", index=False)
     ### Whatshap compare per haploblock
     bm_roi, hb_tab = run_switch(grouped, samp, vers, rn_phased_variants_roi, phased_variants)
     hb_tab.to_csv(f"/hpc/umc_laat/gvandersluis/data/Ont_data_nhung/HG00{samp}/{vers}_ROI/final_df.csv", index=False)
